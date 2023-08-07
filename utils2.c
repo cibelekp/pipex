@@ -6,7 +6,7 @@
 /*   By: ckojima- <ckojima-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 21:38:59 by ckojima-          #+#    #+#             */
-/*   Updated: 2023/08/07 20:56:23 by ckojima-         ###   ########.fr       */
+/*   Updated: 2023/08/07 22:53:06 by ckojima-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,17 +54,17 @@ int	empty_str(char *str)
 
 void	cleanup_fds(int *pipefd, int *files_fds, int *dup_fds)
 {
-	if (pipefd[0] != -1)
+	if (pipefd && pipefd[0] != -1)
 		close(pipefd[0]);
-	if (pipefd[1] != -1)
+	if (pipefd && pipefd[1] != -1)
 		close(pipefd[1]);
-	if (files_fds[0] != -1)
+	if (files_fds && files_fds[0] != -1)
 		close(files_fds[0]);
-	if (files_fds[1] != -1)
+	if (files_fds && files_fds[1] != -1)
 		close(files_fds[1]);
-	if (dup_fds[0] != -1)
+	if (dup_fds && dup_fds[0] != -1)
 		close(dup_fds[0]);
-	if (dup_fds[1] != -1)
+	if (dup_fds && dup_fds[1] != -1)
 		close(dup_fds[1]);
 }
 
@@ -82,13 +82,3 @@ void	cleanup_mem(char *str, char **array)
 		free(array);
 	}
 }
-
-// void	free_array(char **arr)
-// {
-// 	int i;
-
-// 	i = -1;
-// 	while (arr[++i])
-// 		free(arr[i]);
-// 	free(arr);
-// }

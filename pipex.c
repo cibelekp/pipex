@@ -6,7 +6,7 @@
 /*   By: ckojima- <ckojima-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 21:34:21 by ckojima-          #+#    #+#             */
-/*   Updated: 2023/08/07 20:57:01 by ckojima-         ###   ########.fr       */
+/*   Updated: 2023/08/07 22:54:51 by ckojima-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,9 @@ void	child2(int *pipefd, int *files_fds, char *cmd2, char *envp[])
 	if (dup_fds[1] < 0)
 		error(5);
 	close(files_fds[1]);
-	if (exec_cmd(cmd2, envp) == -1) //
+	if (exec_cmd(cmd2, envp) == -1)
 	{
 		cleanup_fds(pipefd, files_fds, dup_fds);
-		// error(11); //or no message, just exit otherwise double message
 		exit(EXIT_FAILURE);
 	}
 }
@@ -56,11 +55,9 @@ void	child1(int *pipefd, int *files_fds, char *cmd1, char *envp[])
 	if (dup_fds[1] < 0)
 		error(5);
 	close(files_fds[0]);
-	// exec_cmd(cmd1, envp);
-	if (exec_cmd(cmd1, envp) == -1) //
+	if (exec_cmd(cmd1, envp) == -1)
 	{
 		cleanup_fds(pipefd, files_fds, dup_fds);
-		// error(11); //or no message, just exit otherwise double message
 		exit(EXIT_FAILURE);
 	}
 }
@@ -73,19 +70,16 @@ int	main(int ac, char *av[], char *envp[])
 	int	pipefd[2];
 
 	check_args(ac, av, envp);
+	open_fds(av, files_fds);
 	if (pipe(pipefd) == -1)
 		error(1);
-	open_fds(av, files_fds);
 	pid1 = forking();
 	if (pid1 == 0)
 		child1(pipefd, files_fds, av[2], envp);
 	pid2 = forking();
 	if (pid2 == 0)
 		child2(pipefd, files_fds, av[3], envp);
-	close(pipefd[0]);
-	close(pipefd[1]);
-	close(files_fds[0]);
-	close(files_fds[1]);
+	cleanup_fds(pipefd, files_fds, NULL);
 	waitpid(pid1, NULL, 0);
 	waitpid(pid2, NULL, 0);
 	return (0);
