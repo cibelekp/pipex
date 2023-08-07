@@ -13,7 +13,8 @@
 NAME			= pipex
 SOURCES			= ${NAME}.c utils.c utils2.c
 OBJECTS			= ${SOURCES:.c=.o}
-CC				= cc
+CC				= cc\
+
 CFLAGS			= -Wall -Wextra -Werror -g
 # CFLAGS		+= -fsanitize=address -fsanitize=undefined
 RM				= rm -rf

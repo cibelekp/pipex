@@ -6,7 +6,7 @@
 /*   By: ckojima- <ckojima-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 21:34:21 by ckojima-          #+#    #+#             */
-/*   Updated: 2023/08/06 22:39:35 by ckojima-         ###   ########.fr       */
+/*   Updated: 2023/08/07 20:57:01 by ckojima-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,27 +22,47 @@ void	check_args(int ac, char *av[], char *envp[])
 		error(10);
 }
 
-void	child2(int *pipefd, int *outfile_fd, char *cmd2, char *envp[])
+void	child2(int *pipefd, int *files_fds, char *cmd2, char *envp[])
 {
-	dup2(pipefd[0], STDIN_FILENO);
+	int	dup_fds[2];
+
+	dup_fds[0] = dup2(pipefd[0], STDIN_FILENO);
+	if (dup_fds[0] < 0)
+		error(5);
 	close(pipefd[0]);
 	close(pipefd[1]);
-	dup2(outfile_fd[1], STDOUT_FILENO);
-	close(outfile_fd[1]);
-	// exec command 2  -> EVENTUALLY SEND fds TO CLOSE IN CASE OF ERROR
-	exec_cmd(cmd2, envp);
+	dup_fds[1] = dup2(files_fds[1], STDOUT_FILENO);
+	if (dup_fds[1] < 0)
+		error(5);
+	close(files_fds[1]);
+	if (exec_cmd(cmd2, envp) == -1) //
+	{
+		cleanup_fds(pipefd, files_fds, dup_fds);
+		// error(11); //or no message, just exit otherwise double message
+		exit(EXIT_FAILURE);
+	}
 }
 
-void	child1(int *pipefd, int *infile_fd, char *cmd1, char *envp[])
+void	child1(int *pipefd, int *files_fds, char *cmd1, char *envp[])
 {
-	if (dup2(pipefd[1], STDOUT_FILENO) < 0)
+	int	dup_fds[2];
+
+	dup_fds[0] = dup2(pipefd[1], STDOUT_FILENO);
+	if (dup_fds[0] < 0)
 		error(5);
 	close(pipefd[0]);
 	close(pipefd[1]);
-	if (dup2(infile_fd[0], STDIN_FILENO) < 0)
+	dup_fds[1] = dup2(files_fds[0], STDIN_FILENO);
+	if (dup_fds[1] < 0)
 		error(5);
-	close(infile_fd[0]);
-	exec_cmd(cmd1, envp);
+	close(files_fds[0]);
+	// exec_cmd(cmd1, envp);
+	if (exec_cmd(cmd1, envp) == -1) //
+	{
+		cleanup_fds(pipefd, files_fds, dup_fds);
+		// error(11); //or no message, just exit otherwise double message
+		exit(EXIT_FAILURE);
+	}
 }
 
 int	main(int ac, char *av[], char *envp[])

@@ -6,7 +6,7 @@
 /*   By: ckojima- <ckojima-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/06 21:38:59 by ckojima-          #+#    #+#             */
-/*   Updated: 2023/08/06 22:40:10 by ckojima-         ###   ########.fr       */
+/*   Updated: 2023/08/07 20:56:23 by ckojima-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,25 +29,14 @@ void	error(int err)
 	if (err == 7)
 		perror("Error (execve)");
 	if (err == 8)
-	{
-		ft_putendl_fd("Error: Bad arguments.", 2);
-		ft_putendl_fd("Usage: ./pipex <input> <cmd1> <cmd2> <output>", 1);
-	}
+		ft_putendl_fd("Bad args: ./pipex <input> <cmd1> <cmd2> <output>", 2);
 	if (err == 9)
 		ft_putendl_fd("Error: Invalid command.", 2);
 	if (err == 10)
 		perror("Error (envp)");
+	if (err == 11)
+		perror("Permission denied");
 	exit(EXIT_FAILURE);
-}
-
-void	free_array(char **arr)
-{
-	int	i;
-
-	i = -1;
-	while (arr[++i])
-		free(arr[i]);
-	free(arr);
 }
 
 int	empty_str(char *str)
@@ -62,3 +51,44 @@ int	empty_str(char *str)
 	}
 	return (1);
 }
+
+void	cleanup_fds(int *pipefd, int *files_fds, int *dup_fds)
+{
+	if (pipefd[0] != -1)
+		close(pipefd[0]);
+	if (pipefd[1] != -1)
+		close(pipefd[1]);
+	if (files_fds[0] != -1)
+		close(files_fds[0]);
+	if (files_fds[1] != -1)
+		close(files_fds[1]);
+	if (dup_fds[0] != -1)
+		close(dup_fds[0]);
+	if (dup_fds[1] != -1)
+		close(dup_fds[1]);
+}
+
+void	cleanup_mem(char *str, char **array)
+{
+	int	i;
+
+	if (str)
+		free(str);
+	if (array)
+	{
+		i = -1;
+		while (array[++i])
+			free(array[i]);
+		free(array);
+	}
+}
+
+// void	free_array(char **arr)
+// {
+// 	int i;
+
+// 	i = -1;
+// 	while (arr[++i])
+// 		free(arr[i]);
+// 	free(arr);
+// }
